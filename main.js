@@ -7,7 +7,7 @@ function start(size){
     ctx = canvas.getContext("2d");
     
     ctx.fillStyle = "green";
-    var map = new Map(8,6);
+    var map = new Map(13, 9);
 
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -44,7 +44,12 @@ class Map{
     }
 
     draw(canvas) {
-        var width = 1024/this.sizeX;
+        var width;
+        if (this.sizeX > this.sizeY){
+            width = 1024/this.sizeX;
+        } else {
+            width = 1024/this.sizeY;
+        }
         for (var i=0; i<this.sizeY; i++) {
             for (var j=0; j<this.sizeX; j++) {
                 this.tiles[i][j].draw(canvas, {x:j*width, y:i*width}, width);
