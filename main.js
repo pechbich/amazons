@@ -7,7 +7,7 @@ function start(size){
     ctx = canvas.getContext("2d");
     
     ctx.fillStyle = "green";
-    var map = new Map(13, 9);
+    var map = new Map(8, 8);
 
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -40,7 +40,7 @@ class Map{
     }
 
     update() {
-        // ту происходит вся логика игры
+        // тут происходит вся логика игры
     }
 
     draw(canvas) {
@@ -65,7 +65,9 @@ class Tile{
 
     constructor(position, bodyColor){
         this.position = position;
-        this.bodyColor = bodyColor;      
+        this.bodyColor = bodyColor;
+        this.figure = figure;
+        this.empty = true;     
     }
 
     draw(canvas, offset, size) {
@@ -75,14 +77,59 @@ class Tile{
         canvas.rect(offset.x, offset.y, size, size);
         canvas.stroke();
     }
+
+    isEmpty(){
+        if (this.figure == None){
+            this.empty = true;
+        } else {
+            this.empty = false;
+        }
+    }
+
+    takeFigureAway(){
+        takenFigure = this.figure;
+        this.figure == NaN;
+        return takenFigure;
+    }
+
+    placeFigureHere(figure){
+        this.figure = figure;
+    }
 }
 
 class Figure {
-    constructor() {
-
+        
+    constructor(team){
+        var figureImage = new Image();
+        if (team == 'white'){
+            figureImage.src = '/images/whtfig';
+        } else {
+            figureImage.src = '/images/blkfig';
+        }
     }
-
-    draw(canvas, size) {
     
+    draw(canvas, size) {
+       //useless lmao 
     }
+}
+
+class Player {
+
+    constructor(team, numOfFigures) {
+        this.team = team;
+        this.allFigures = [];
+        for (i = 0; i<numOfFigures; i++){
+            this.allFigures[i].push(new Figure(this.team))
+        }
+    }
+
+    moveFigure(fromTile, toTile){
+        takenFigure = fromTile.takeFigureAway();
+        toTile.placeFigureHere(takenFigure);
+    }
+
+    /* getAllFigures() {
+        return this.allFigures;
+    } */
+
 }
