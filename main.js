@@ -3,7 +3,7 @@ const height = 1024;
 var bodyColor;
 
 function start(size){
-    canvas = document.getElementById("screen");
+    canvas = document.getElementById("screen");    
     ctx = canvas.getContext("2d");
     
     ctx.fillStyle = "green";
@@ -13,6 +13,7 @@ function start(size){
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         map.update();
         map.draw(ctx);
+        map.clickHandler(map, canvas);
         setTimeout(gameLoop, 0.03)
     }
 
@@ -57,6 +58,34 @@ class Map{
         }
     }
 
+    clickHandler(map, canvas){        
+        canvas.addEventListener("click", function(event){
+            var x = event.pageX - canvas.offsetLeft,
+                y = event.pageY - canvas.offsetTop;
+            for (var i=0; i<map.sizeY; i++){
+                for (var j=0; j<map.sizeX; j++){
+                    let height = 1024/map.sizeY;
+                    let width = 1024/map.sizeX;
+                    if (y > j*height && 
+                        y < (j+1)*height && 
+                        x > i*width &&
+                        x < (i+1)*width){
+                            console.log(i+" "+j);
+                        }
+                }
+            }
+        }, false);
+
+
+    }
+
+    selectTile(posX, posY){
+        selectedTile = this.tiles[posX][posY];
+        selectedTile.bodyColor = "#f43e16";
+        console.log("selected tile");
+        //пока что юзлес
+    }
+
 }
 
 
@@ -66,8 +95,7 @@ class Tile{
     constructor(position, bodyColor){
         this.position = position;
         this.bodyColor = bodyColor;
-        this.figure = figure;
-        this.empty = true;     
+        this.figure = null;   
     }
 
     draw(canvas, offset, size) {
@@ -79,11 +107,7 @@ class Tile{
     }
 
     isEmpty(){
-        if (this.figure == None){
-            this.empty = true;
-        } else {
-            this.empty = false;
-        }
+        return this.figure == null;
     }
 
     takeFigureAway(){
@@ -124,8 +148,10 @@ class Player {
     }
 
     moveFigure(fromTile, toTile){
-        takenFigure = fromTile.takeFigureAway();
-        toTile.placeFigureHere(takenFigure);
+        if (toTile.isEmpty()){
+            takenFigure = fromTile.takeFigureAway();        
+            toTile.placeFigureHere(takenFigure);
+        }
     }
 
     /* getAllFigures() {
