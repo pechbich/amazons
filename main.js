@@ -13,7 +13,6 @@ function start(size){
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         map.update();
         map.draw(ctx);
-        map.clickHandler(map, canvas);
         setTimeout(gameLoop, 0.03)
     }
 
@@ -37,7 +36,8 @@ class Map{
                     this.tiles[i].push(new Tile({y:i, x:j}, bodyColor="#000000"));
                 }
             }
-        }
+        }        
+        this.clickHandler(this, canvas);
     }
 
     update() {
@@ -58,7 +58,8 @@ class Map{
         }
     }
 
-    clickHandler(map, canvas){        
+    clickHandler(map, canvas){
+        //move to constructor        
         canvas.addEventListener("click", function(event){
             var x = event.pageX - canvas.offsetLeft,
                 y = event.pageY - canvas.offsetTop;
