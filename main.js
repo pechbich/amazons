@@ -32,6 +32,10 @@ class GameEvent {
     addListener(func) {
         this.listeners[this.lastListenerIndex] = func;
         this.lastListenerIndex+=1;
+
+        // когда добавляешь обработчик хочется иметь возможность его удалить, 
+        // а часто передают анонимную функцию в обработчик,
+        // поэтому возвращаем некоторую информацию, которая позволит удалить обработчик
         return {
             key:this.lastListenerIndex-1,
             func: func
@@ -43,6 +47,8 @@ class GameEvent {
     }
 
     call(eventInfo) {
+        // когда событие происходит - необходимо вызвать этот метод, 
+        // который передаст всю информацию о событии во все "привязанные" обработчики
         for (var key in this.listeners) {
             let listener = this.listeners[key];
             listener(eventInfo);
@@ -58,7 +64,7 @@ class Map{
         selectFigure: new GameEvent(),
         moveFigure: new GameEvent(),
         shootFire: new GameEvent()
-    };
+    }; // список игровых событий
 
 
     constructor(sizeX, sizeY, canvas) {
@@ -82,14 +88,18 @@ class Map{
         var map = this
 
         var gameEvents = this.gameEvents;
-
+        
+        // необходимо перейти от абстракции системных событий (таких как клики), к игровым событиям
         canvas.addEventListener("click", function(event){
             
             var tile = map.getTile(event);
-            // тут выбираем какой gameEvent срабатывает
+            
+            // собираем необходимую информацию о событии
             let eventInfo = {
                 tile: tile
             };
+            
+            // тут срабатывают gameEvents
 
             gameEvents.log.call(eventInfo);
 
@@ -148,6 +158,8 @@ class Map{
     }
 
     getTile(event){
+        // возвращает Tile, на который нажал event
+
         var x = event.pageX - canvas.offsetLeft,
             y = event.pageY - canvas.offsetTop;
         for (var i=0; i<this.sizeY; i++){
@@ -166,7 +178,6 @@ class Map{
                 }
             }
         return null
-        
     }
 
 }
