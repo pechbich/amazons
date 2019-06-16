@@ -7,71 +7,29 @@ function start(size){
     ctx = canvas.getContext("2d");
     
     ctx.fillStyle = "green";
-    var map = new Map(8, 8, canvas);
+    var map = new Map(8, 8);
 
     function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
         map.update();
         map.draw(ctx);
+<<<<<<< HEAD
 <<<<<<< HEAD
         setTimeout(gameLoop, 0.03)
 =======
         setTimeout(gameLoop, 0.033);
 >>>>>>> e5e255068ad864311c40c5038ca6905fae902989
+=======
+        map.clickHandler(map, canvas);
+        setTimeout(gameLoop, 0.03)
+>>>>>>> 50be87f7a28f0ea950bea138b57a3f61d0148376
     }
 
-    setTimeout(gameLoop, 0.033);
-}
-
-
-class GameEvent {
-    func = null;
-    listeners = null;
-
-    constructor() {
-        this.listeners = {};
-        this.lastListenerIndex = 0;
-    }
-
-    addListener(func) {
-        this.listeners[this.lastListenerIndex] = func;
-        this.lastListenerIndex+=1;
-
-        // когда добавляешь обработчик хочется иметь возможность его удалить, 
-        // а часто передают анонимную функцию в обработчик,
-        // поэтому возвращаем некоторую информацию, которая позволит удалить обработчик
-        return {
-            key:this.lastListenerIndex-1,
-            func: func
-        };
-    }
-
-    removeListener(listener) {
-        delete this.listeners[listener.key];
-    }
-
-    call(eventInfo) {
-        // когда событие происходит - необходимо вызвать этот метод, 
-        // который передаст всю информацию о событии во все "привязанные" обработчики
-        for (var key in this.listeners) {
-            let listener = this.listeners[key];
-            listener(eventInfo);
-        }
-    }
+    setTimeout(gameLoop, 1)
 }
 
 class Map{
-    gameEvents = {
-        log: new GameEvent(),
-        selectTile: new GameEvent(),
-        unselectTile: new GameEvent(),
-        selectFigure: new GameEvent(),
-        moveFigure: new GameEvent(),
-        shootFire: new GameEvent()
-    }; // список игровых событий
-
-
-    constructor(sizeX, sizeY, canvas) {
+    constructor(sizeX, sizeY) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.tiles = [];
@@ -79,8 +37,8 @@ class Map{
         for (var i=0; i<sizeY; i++) {
             this.tiles.push([]);
             for (var j=0; j<sizeX; j++) {
-                let white = (i+j)%2;
-                if (white){
+                let sum = i+j;
+                if (sum % 2 == 0){
                     this.tiles[i].push(new Tile({y:i, x:j}, bodyColor="#A4A4A4"));
                     
                 } else {
@@ -92,6 +50,7 @@ class Map{
         this.clickHandler(this, canvas);
 =======
         }
+<<<<<<< HEAD
         
         var map = this
 
@@ -146,6 +105,8 @@ class Map{
             })
         });
 >>>>>>> e5e255068ad864311c40c5038ca6905fae902989
+=======
+>>>>>>> 50be87f7a28f0ea950bea138b57a3f61d0148376
     }
 
     update() {
@@ -167,8 +128,12 @@ class Map{
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     clickHandler(map, canvas){
         //move to constructor        
+=======
+    clickHandler(map, canvas){        
+>>>>>>> 50be87f7a28f0ea950bea138b57a3f61d0148376
         canvas.addEventListener("click", function(event){
             var x = event.pageX - canvas.offsetLeft,
                 y = event.pageY - canvas.offsetTop;
@@ -182,6 +147,7 @@ class Map{
                         x < (i+1)*width){
                             console.log(i+" "+j);
                         }
+<<<<<<< HEAD
 =======
     getTile(event){
         // возвращает Tile, на который нажал event
@@ -202,9 +168,20 @@ class Map{
                         return selectedTile;
                     }
 >>>>>>> e5e255068ad864311c40c5038ca6905fae902989
+=======
+>>>>>>> 50be87f7a28f0ea950bea138b57a3f61d0148376
                 }
             }
-        return null
+        }, false);
+
+
+    }
+
+    selectTile(posX, posY){
+        selectedTile = this.tiles[posX][posY];
+        selectedTile.bodyColor = "#f43e16";
+        console.log("selected tile");
+        //пока что юзлес
     }
 
 }
