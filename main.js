@@ -7,67 +7,21 @@ function start(size){
     ctx = canvas.getContext("2d");
     
     ctx.fillStyle = "green";
-    var map = new Map(8, 8, canvas);
+    var map = new Map(8, 8);
 
     function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
         map.update();
         map.draw(ctx);
-        setTimeout(gameLoop, 0.033);
+        map.clickHandler(map, canvas);
+        setTimeout(gameLoop, 0.03)
     }
 
-    setTimeout(gameLoop, 0.033);
-}
-
-
-class GameEvent {
-    func = null;
-    listeners = null;
-
-    constructor() {
-        this.listeners = {};
-        this.lastListenerIndex = 0;
-    }
-
-    addListener(func) {
-        this.listeners[this.lastListenerIndex] = func;
-        this.lastListenerIndex+=1;
-
-        // когда добавляешь обработчик хочется иметь возможность его удалить, 
-        // а часто передают анонимную функцию в обработчик,
-        // поэтому возвращаем некоторую информацию, которая позволит удалить обработчик
-        return {
-            key:this.lastListenerIndex-1,
-            func: func
-        };
-    }
-
-    removeListener(listener) {
-        delete this.listeners[listener.key];
-    }
-
-    call(eventInfo) {
-        // когда событие происходит - необходимо вызвать этот метод, 
-        // который передаст всю информацию о событии во все "привязанные" обработчики
-        for (var key in this.listeners) {
-            let listener = this.listeners[key];
-            listener(eventInfo);
-        }
-    }
+    setTimeout(gameLoop, 1)
 }
 
 class Map{
-    gameEvents = {
-        log: new GameEvent(),
-        selectTile: new GameEvent(),
-        unselectTile: new GameEvent(),
-        selectFigure: new GameEvent(),
-        moveFigure: new GameEvent(),
-        shootFire: new GameEvent()
-    }; // список игровых событий
-
-
-    constructor(sizeX, sizeY, canvas) {
+    constructor(sizeX, sizeY) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.tiles = [];
@@ -75,8 +29,8 @@ class Map{
         for (var i=0; i<sizeY; i++) {
             this.tiles.push([]);
             for (var j=0; j<sizeX; j++) {
-                let white = (i+j)%2;
-                if (white){
+                let sum = i+j;
+                if (sum % 2 == 0){
                     this.tiles[i].push(new Tile({y:i, x:j}, bodyColor="#A4A4A4"));
                     
                 } else {
@@ -84,59 +38,6 @@ class Map{
                 }
             }
         }
-        
-        var map = this
-
-        var gameEvents = this.gameEvents;
-        
-        // необходимо перейти от абстракции системных событий (таких как клики), к игровым событиям
-        canvas.addEventListener("click", function(event){
-            
-            var tile = map.getTile(event);
-            
-            // собираем необходимую информацию о событии
-            let eventInfo = {
-                tile: tile
-            };
-            
-            // тут срабатывают gameEvents
-
-            gameEvents.log.call(eventInfo);
-
-            if (selectedTile.tile !== null) {
-                gameEvents.unselectTile.call(eventInfo);
-            }
-
-            gameEvents.selectTile.call(eventInfo);
-               
-        }, false);
-
-        this.gameEvents.log.addListener(function(e) {
-            console.log(e)
-        });
-        
-        var selectedTile = {tile: null}
-        this.gameEvents.selectTile.addListener(function(e) {
-            var tile = e.tile;
-            tile.bodyColor = "#440000";
-            selectedTile.tile = tile;
-            
-            // когда выделяем клетку, то добавляем обработчик события, который отменит выделение клетки
-            var b = {} // сюда будет записан созданный "слушатель"
-            b.listener = map.gameEvents.unselectTile.addListener(function(e2){
-                let white = (tile.position.x+tile.position.y)%2;
-                if (white){
-                    bodyColor="#A4A4A4";
-                    
-                } else {
-                    bodyColor="#000000";
-                }
-                tile.bodyColor = bodyColor;
-
-                // удаляем обработчик события, который отменял выделение
-                map.gameEvents.unselectTile.removeListener(b.listener);
-            })
-        });
     }
 
     update() {
@@ -157,27 +58,32 @@ class Map{
         }
     }
 
-    getTile(event){
-        // возвращает Tile, на который нажал event
-
-        var x = event.pageX - canvas.offsetLeft,
-            y = event.pageY - canvas.offsetTop;
-        for (var i=0; i<this.sizeY; i++){
-            for (var j=0; j<this.sizeX; j++){
-                let height = 1024/this.sizeY;
-                let width = 1024/this.sizeX;
-                if (y > j*height && 
-                    y < (j+1)*height && 
-                    x > i*width &&
-                    x < (i+1)*width){
-                        var posX = Math.floor(j),
-                            posY = Math.floor(i);
-                        var selectedTile = this.tiles[posX][posY];
-                        return selectedTile;
-                    }
+    clickHandler(map, canvas){        
+        canvas.addEventListener("click", function(event){
+            var x = event.pageX - canvas.offsetLeft,
+                y = event.pageY - canvas.offsetTop;
+            for (var i=0; i<map.sizeY; i++){
+                for (var j=0; j<map.sizeX; j++){
+                    let height = 1024/map.sizeY;
+                    let width = 1024/map.sizeX;
+                    if (y > j*height && 
+                        y < (j+1)*height && 
+                        x > i*width &&
+                        x < (i+1)*width){
+                            console.log(i+" "+j);
+                        }
                 }
             }
-        return null
+        }, false);
+
+
+    }
+
+    selectTile(posX, posY){
+        selectedTile = this.tiles[posX][posY];
+        selectedTile.bodyColor = "#f43e16";
+        console.log("selected tile");
+        //пока что юзлес
     }
 
 }
