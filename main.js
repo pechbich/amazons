@@ -9,14 +9,14 @@ function start(size){
     var map = new Map(8, 8);
 
     function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         map.update();
         map.draw(ctx);
         map.clickHandler(map, canvas);
-        setTimeout(gameLoop, 0.03)
+        setTimeout(gameLoop, 0.03);
     }
 
-    setTimeout(gameLoop, 1)
+    setTimeout(gameLoop, 0.03);
 }
 
 function changePosition(object, newPosX, newPosY){
@@ -25,8 +25,20 @@ function changePosition(object, newPosX, newPosY){
     // return object ?
 }
 
-function highlightTile(tile){
+function unselectAll(map){
+    
+}
+
+function highlightTile(map, x, y){
+    var tile = map.tiles[x][y];
     if (!tile.selected){
+        for (var i=0; i<map.tiles.length; i++){
+            for (var j=0; j<map.tiles[i].length; j++){
+                let tile = map.tiles[i][j];
+                tile.selected = false;
+                tile.bodyColour = tile.defaultBodyColour;
+            }
+        }
         tile.bodyColour = "#cc0000";
         tile.selected = true;
     } else {
@@ -85,7 +97,7 @@ class Map{
                         y < (j+1)*height && 
                         x > i*width &&
                         x < (i+1)*width){
-                            highlightTile(map.tiles[j][i]); //idk whyy but its backwards
+                            highlightTile(map, j, i); //idk whyy but its backwards
                         }
                 }
             }
@@ -93,13 +105,6 @@ class Map{
 
 
     }
-
-    /* selectTile(posX, posY){
-        selectedTile = this.tiles[posX][posY];
-        selectedTile.bodyColour = "#f43e16";
-        console.log("selected tile");
-        //пока что юзлес
-    } */
 
 }
 
