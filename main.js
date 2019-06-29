@@ -25,10 +25,6 @@ function changePosition(object, newPosX, newPosY){
     // return object ?
 }
 
-function unselectAll(map){
-    
-}
-
 function highlightTile(map, x, y){
     var tile = map.tiles[x][y];
     if (!tile.selected){
@@ -102,10 +98,7 @@ class Map{
                 }
             }
         }, false);
-
-
     }
-
 }
 
 
@@ -179,9 +172,5 @@ class Player {
             toTile.placeFigureHere(takenFigure);
         }
     }
-
-    /* getAllFigures() {
-        return this.allFigures;
-    } */
 
 }
