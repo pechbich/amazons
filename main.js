@@ -1,10 +1,9 @@
 const width = 1024;
 const height = 1024;
-var bodyColor;
 
 function start(size){
     canvas = document.getElementById("screen");    
-    ctx = canvas.getContext("2d");
+    ctx = canvas.getContext("2d");    
     
     ctx.fillStyle = "green";
     var map = new Map(8, 8);
@@ -27,8 +26,13 @@ function changePosition(object, newPosX, newPosY){
 }
 
 function highlightTile(tile){
-    tile.bodyColor = "#FFFFFF";
-    tile.selected = true;
+    if (!tile.selected){
+        tile.bodyColour = "#cc0000";
+        tile.selected = true;
+    } else {
+        tile.bodyColour = tile.defaultBodyColour;
+        tile.selected = false;
+    }
 }
 
 
@@ -43,10 +47,9 @@ class Map{
             for (var j=0; j<sizeX; j++) {
                 let sum = i+j;
                 if (sum % 2 == 0){
-                    this.tiles[i].push(new Tile({y:i, x:j}, bodyColor="#A4A4A4"));
-                    
+                    this.tiles[i].push(new Tile(i, j, "#999966"));                    
                 } else {
-                    this.tiles[i].push(new Tile({y:i, x:j}, bodyColor="#000000"));
+                    this.tiles[i].push(new Tile(i, j, "#cc9900"));
                 }
             }
         }
@@ -65,7 +68,7 @@ class Map{
         }
         for (var i=0; i<this.sizeY; i++) {
             for (var j=0; j<this.sizeX; j++) {
-                this.tiles[i][j].draw(canvas, {x:j*width, y:i*width}, width);
+                this.tiles[i][j].draw(canvas, j*width, i*width, width);
             }
         }
     }
@@ -93,7 +96,7 @@ class Map{
 
     /* selectTile(posX, posY){
         selectedTile = this.tiles[posX][posY];
-        selectedTile.bodyColor = "#f43e16";
+        selectedTile.bodyColour = "#f43e16";
         console.log("selected tile");
         //пока что юзлес
     } */
@@ -102,20 +105,25 @@ class Map{
 
 
 class Tile{
-    borderColor = "#101010";
+    borderColour = "#101010";
 
-    constructor(position, bodyColor){
-        this.position = position;
-        this.bodyColor = bodyColor;
+    constructor(posX, posY, bodyColour){
+        this.posX = posX;
+        this.posY = posY;
+        this.bodyColour = bodyColour;
         this.figure = null;
-        this.selected = false;   
+        this.selected = false;
+        this.defaultBodyColour = bodyColour;   
     }
 
-    draw(canvas, offset, size) {
-        canvas.fillStyle = this.bodyColor;
-        canvas.fillRect(offset.x, offset.y, size, size);
-        canvas.fillStyle = this.borderColor;
-        canvas.rect(offset.x, offset.y, size, size);
+    draw(canvas, offsetX, offsetY, size) {
+        canvas.fillStyle = this.bodyColour;
+        canvas.fillRect(offsetX, offsetY, size, size);
+        canvas.fillStyle = this.borderColour;
+        canvas.rect(offsetX, offsetY, size, size);
+        // draws figures everywhere
+        var fig = new Figure("white");
+        canvas.drawImage(fig.figureImage, offsetX, offsetY, size, size);
         canvas.stroke();
     }
 
@@ -137,11 +145,11 @@ class Tile{
 class Figure {
         
     constructor(team){
-        var figureImage = new Image();
+        this.figureImage = new Image();
         if (team == 'white'){
-            figureImage.src = '/images/whtfig';
+            this.figureImage.src = '/images/whtfig';
         } else {
-            figureImage.src = '/images/blkfig';
+            this.figureImage.src = '/images/blkfig';
         }
     }
     
