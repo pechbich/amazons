@@ -6,17 +6,17 @@ function start(size){
     ctx = canvas.getContext("2d");    
     
     ctx.fillStyle = "green";
-    var map = new Map(8, 8);
+    map = new Map(size);
 
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        map.update();
+        //map.update();
         map.draw(ctx);
         map.clickHandler(map, canvas);
         setTimeout(gameLoop, 0.03);
     }
 
-    setTimeout(gameLoop, 0.03);
+    setTimeout(gameLoop, 0.01);
 }
 
 function changePosition(object, newPosX, newPosY){
@@ -25,39 +25,21 @@ function changePosition(object, newPosX, newPosY){
     // return object ?
 }
 
-function highlightTile(map, x, y){
-    var tile = map.tiles[x][y];
-    if (!tile.selected){
-        for (var i=0; i<map.tiles.length; i++){
-            for (var j=0; j<map.tiles[i].length; j++){
-                let tile = map.tiles[i][j];
-                tile.selected = false;
-                tile.bodyColour = tile.defaultBodyColour;
-            }
-        }
-        tile.bodyColour = "#cc0000";
-        tile.selected = true;
-    } else {
-        tile.bodyColour = tile.defaultBodyColour;
-        tile.selected = false;
-    }
-}
-
 
 class Map{
-    constructor(sizeX, sizeY) {
-        this.sizeX = sizeX;
-        this.sizeY = sizeY;
+    constructor(size) {
+        this.size = size;
         this.tiles = [];
+        this.positionSelected = null;
 
-        for (var i=0; i<sizeY; i++) {
+        for (var i=0; i<size; i++) {
             this.tiles.push([]);
-            for (var j=0; j<sizeX; j++) {
-                let sum = i+j;
-                if (sum % 2 == 0){
-                    this.tiles[i].push(new Tile(i, j, "#999966"));                    
+            for (var j=0; j<size; j++) {
+                let white = (i+j)%2;
+                if (white){
+                    this.tiles[i].push(new Tile({x:i, y:j}, "#999966"));                    
                 } else {
-                    this.tiles[i].push(new Tile(i, j, "#cc9900"));
+                    this.tiles[i].push(new Tile({x:i, y:j}, "#cc9900"));
                 }
             }
         }
@@ -69,34 +51,33 @@ class Map{
 
     draw(canvas) {
         var width;
-        if (this.sizeX > this.sizeY){
-            width = 1024/this.sizeX;
-        } else {
-            width = 1024/this.sizeY;
-        }
-        for (var i=0; i<this.sizeY; i++) {
-            for (var j=0; j<this.sizeX; j++) {
+        width = 1024/this.size;        
+        for (var i=0; i<this.size; i++) {
+            for (var j=0; j<this.size; j++) {
                 this.tiles[i][j].draw(canvas, j*width, i*width, width);
             }
         }
     }
 
+    changeSelection(positionSelected){
+        if (this.positionSelected !== null){
+            var oldTile = this.tiles[this.positionSelected.x][this.positionSelected.y];
+            oldTile.bodyColour = oldTile.defaultBodyColour;
+        }
+        if (positionSelected != this.positionSelected){
+            this.positionSelected = positionSelected;        
+            this.tiles[positionSelected.x][positionSelected.y].bodyColour = "#cc0000";
+        }  
+    }
+
     clickHandler(map, canvas){        
         canvas.addEventListener("click", function(event){
-            var x = event.pageX - canvas.offsetLeft,
-                y = event.pageY - canvas.offsetTop;
-            for (var i=0; i<map.sizeY; i++){
-                for (var j=0; j<map.sizeX; j++){
-                    let height = 1024/map.sizeY;
-                    let width = 1024/map.sizeX;
-                    if (y > j*height && 
-                        y < (j+1)*height && 
-                        x > i*width &&
-                        x < (i+1)*width){
-                            highlightTile(map, j, i); //idk whyy but its backwards
-                        }
-                }
-            }
+            var x = event.pageY - canvas.offsetTop,
+                y = event.pageX - canvas.offsetLeft;
+            var posX = Math.floor(x/(width/map.size)), // must be an easier way to do this
+                posY = Math.floor(y/(width/map.size));
+            console.log(posX, posY);
+            map.changeSelection({x:posX, y:posY});
         }, false);
     }
 }
@@ -105,12 +86,10 @@ class Map{
 class Tile{
     borderColour = "#101010";
 
-    constructor(posX, posY, bodyColour){
-        this.posX = posX;
-        this.posY = posY;
+    constructor(position, bodyColour){
+        this.position = position;
         this.bodyColour = bodyColour;
         this.figure = null;
-        this.selected = false;
         this.defaultBodyColour = bodyColour;   
     }
 
