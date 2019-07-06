@@ -62,9 +62,9 @@ class Map{
             for (var j=0; j<size; j++) {
                 let white = (i+j)%2;
                 if (white){
-                    this.tiles[i].push(new Tile({x:i, y:j}, "#999966"));                    
+                    this.tiles[i].push(new Tile({x:i, y:j}, "#de8416"));                    
                 } else {
-                    this.tiles[i].push(new Tile({x:i, y:j}, "#cc9900"));
+                    this.tiles[i].push(new Tile({x:i, y:j}, "#db9744"));
                 }
             }
         }
