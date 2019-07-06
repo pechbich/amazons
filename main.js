@@ -12,11 +12,11 @@ function start(size){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         //map.update();
         map.draw(ctx);
-        map.clickHandler(map, canvas);
-        setTimeout(gameLoop, 0.03);
+        map.clickListener(map, canvas);
+        setTimeout(gameLoop, 0.3);
     }
 
-    setTimeout(gameLoop, 0.01);
+    setTimeout(gameLoop, 0.1);
 }
 
 function changePosition(object, newPosX, newPosY){
@@ -60,23 +60,42 @@ class Map{
     }
 
     changeSelection(positionSelected){
-        if (this.positionSelected !== null){
-            var oldTile = this.tiles[this.positionSelected.x][this.positionSelected.y];
-            oldTile.bodyColour = oldTile.defaultBodyColour;
+        console.log("called");
+        let map = this;
+        function select(map, positionSelected){
+            map.positionSelected = positionSelected;        
+            map.tiles[positionSelected.x][positionSelected.y].bodyColour = "#cc0000";
         }
-        if (positionSelected != this.positionSelected){
-            this.positionSelected = positionSelected;        
-            this.tiles[positionSelected.x][positionSelected.y].bodyColour = "#cc0000";
-        }  
+        function unselect(map){
+            let oldTile = map.tiles[map.positionSelected.x][map.positionSelected.y];
+            oldTile.bodyColour = oldTile.defaultBodyColour;
+            map.positionSelected = null;
+        }
+        if (this.positionSelected !== null){
+            if (this.positionSelected.x == positionSelected.x){
+                unselect(map);
+                console.log("only unselect");
+            } else {
+                unselect(map);
+                select(map, positionSelected);
+                console.log("unselect and select new");
+            }
+        } else {
+            select(map, positionSelected);
+            console.log("only select");
+        }        
+        
+        //console.log("this", this.positionSelected);
+        //console.log("input", positionSelected);
     }
 
-    clickHandler(map, canvas){        
+    clickListener(map, canvas){        
         canvas.addEventListener("click", function(event){
             var x = event.pageY - canvas.offsetTop,
                 y = event.pageX - canvas.offsetLeft;
             var posX = Math.floor(x/(width/map.size)), // must be an easier way to do this
                 posY = Math.floor(y/(width/map.size));
-            console.log(posX, posY);
+            //console.log(posX, posY);
             map.changeSelection({x:posX, y:posY});
         }, false);
     }
