@@ -1,12 +1,16 @@
 const width = 1024;
 const height = 1024;
 
-function start(size){
+// gotta let user select size and number of figures
+// assuming the game is always for two players
+function start(size, numOfFigures){
     canvas = document.getElementById("screen");    
     ctx = canvas.getContext("2d");    
     
     ctx.fillStyle = "green";
     map = new Map(size);
+    players = [new Player("white", numOfFigures),
+                    new Player("black", numOfFigures)];
 
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -15,6 +19,29 @@ function start(size){
     }
 
     setTimeout(gameLoop, 0.01);
+}
+
+function shuffle(){
+    //copypasted from SO
+    var array = [0,1,2,3,4,5,6,7]; //hardcoded board size for now
+    var counter = array.length,
+    temp, index;
+    
+
+    // While there are elements in the array
+    while (counter > 0) {
+    // Pick a random index
+        index = Math.floor(Math.random() * (counter + 1));
+    
+    // Decrease counter by 1
+        counter--;
+    
+    // And swap the last element with it
+        temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+    return array
 }
 
 function changePosition(object, newPosX, newPosY){
@@ -106,8 +133,28 @@ class Tile{
         canvas.fillStyle = this.borderColour;
         canvas.rect(offsetX, offsetY, size, size);
         // draws figures everywhere
-        var fig = new Figure("white");
-        canvas.drawImage(fig.figureImage, offsetX, offsetY, size, size);
+        //var fig = new Figure("white");
+        //canvas.drawImage(fig.figureImage, offsetX, offsetY, size, size);
+        /* for (let i=0; i<whitePlayer.allFigures.length; i++){
+            if (this.position.x == whitePlayer.allFigures[i].position.x
+                && this.position.y == whitePlayer.allFigures[i].position.y){
+                canvas.drawImage(whitePlayer.allFigures[i].figureImage, offsetX, offsetY, size, size); 
+            }
+        }
+        for (let i=0; i<blackPlayer.allFigures.length; i++){
+            if (this.position == blackPlayer.allFigures[i].position
+                && this.position.y == blackPlayer.allFigures[i].position.y){
+                canvas.drawImage(blackPlayer.allFigures[i].figureImage, offsetX, offsetY, size, size); 
+            }
+        } */
+        for (let i=0; i<players.length; i++){
+            for (let j=0; j<players[i].allFigures.length; j++){
+                if (this.position.x == players[i].allFigures[j].position.x
+                    && this.position.y == players[i].allFigures[j].position.y){
+                        canvas.drawImage(players[i].allFigures[j].figureImage, offsetX, offsetY, size, size);
+                    }
+            }
+        }
         canvas.stroke();
     }
 
@@ -128,7 +175,8 @@ class Tile{
 
 class Figure {
         
-    constructor(team){
+    constructor(team, position){
+        this.position = position
         this.figureImage = new Image();
         if (team == 'white'){
             this.figureImage.src = '/images/whtfig';
@@ -147,8 +195,11 @@ class Player {
     constructor(team, numOfFigures) {
         this.team = team;
         this.allFigures = [];
-        for (i = 0; i<numOfFigures; i++){
-            this.allFigures[i].push(new Figure(this.team))
+        var posXarray = shuffle();
+        var posYarray = shuffle();      
+        for (var i = 0; i<numOfFigures; i++){
+            this.allFigures.push(new Figure(this.team, {x: posXarray[i], y:posYarray[i]}));
+            //console.log("figure's position: {"+this.allFigures[i].position.x+", "+this.allFigures[i].position.y+"}");
         }
     }
 
