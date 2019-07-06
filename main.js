@@ -10,13 +10,11 @@ function start(size){
 
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        //map.update();
         map.draw(ctx);
-        map.clickListener(map, canvas);
-        setTimeout(gameLoop, 0.3);
+        setTimeout(gameLoop, 0.03);
     }
 
-    setTimeout(gameLoop, 0.1);
+    setTimeout(gameLoop, 0.01);
 }
 
 function changePosition(object, newPosX, newPosY){
@@ -43,6 +41,13 @@ class Map{
                 }
             }
         }
+        canvas.addEventListener("click", function(event){
+            var x = event.pageY - canvas.offsetTop,
+                y = event.pageX - canvas.offsetLeft;
+            var posX = Math.floor(x/(width/map.size)), // must be an easier way to do this
+                posY = Math.floor(y/(width/map.size));
+            map.changeSelection({x:posX, y:posY});
+        }, false);
     }
 
     update() {
@@ -60,7 +65,6 @@ class Map{
     }
 
     changeSelection(positionSelected){
-        console.log("called");
         let map = this;
         function select(map, positionSelected){
             map.positionSelected = positionSelected;        
@@ -72,32 +76,16 @@ class Map{
             map.positionSelected = null;
         }
         if (this.positionSelected !== null){
-            if (this.positionSelected.x == positionSelected.x){
+            if (this.positionSelected.x == positionSelected.x &&
+                this.positionSelected.y == positionSelected.y){
                 unselect(map);
-                console.log("only unselect");
             } else {
                 unselect(map);
                 select(map, positionSelected);
-                console.log("unselect and select new");
             }
         } else {
             select(map, positionSelected);
-            console.log("only select");
-        }        
-        
-        //console.log("this", this.positionSelected);
-        //console.log("input", positionSelected);
-    }
-
-    clickListener(map, canvas){        
-        canvas.addEventListener("click", function(event){
-            var x = event.pageY - canvas.offsetTop,
-                y = event.pageX - canvas.offsetLeft;
-            var posX = Math.floor(x/(width/map.size)), // must be an easier way to do this
-                posY = Math.floor(y/(width/map.size));
-            //console.log(posX, posY);
-            map.changeSelection({x:posX, y:posY});
-        }, false);
+        }
     }
 }
 
