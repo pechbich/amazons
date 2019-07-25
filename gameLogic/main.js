@@ -33,37 +33,14 @@ function start(size, numOfFigures){
                         canvasData, 
                         size,  
                         {
-                            white: new Player("white", numOfFigures),
-                            black: new Player("black", numOfFigures) 
+                            white: new Player("white", numOfFigures, {width:size, height: size}),
+                            black: new Player("black", numOfFigures, {width:size, height: size}) 
                         }
                     )
                 )
             })
         ]);
     menu.show();
-}
-
-function shuffle(){
-    //copypasted from SO
-    var array = [0,1,2,3,4,5,6,7]; //hardcoded board size for now
-    var counter = array.length,
-    temp, index;
-    
-
-    // While there are elements in the array
-    while (counter > 0) {
-    // Pick a random index
-        index = Math.floor(Math.random() * (counter + 1));
-    
-    // Decrease counter by 1
-        counter--;
-    
-    // And swap the last element with it
-        temp = array[counter];
-        array[counter] = array[index];
-        array[index] = temp;
-    }
-    return array
 }
 
 function changePosition(object, newPosX, newPosY){
@@ -158,49 +135,63 @@ class GameMap extends Scene{
     }
 
     changeSelection(pos){
-        if (this.selectTile != null
-            && this.selectTile.position.x == pos.x && this.selectTile.position.y == pos.y) {
+        if (this.selectTile != null && this.selectTile.position.x == pos.x && this.selectTile.position.y == pos.y) {
+            
+            if (this.selectTile.hasFigure()) {
+                this.highlightPossibleTiles(false);
+            }
             this.selectTile = null;
-        } else {
-            this.selectTile = this.getTile(pos.x, pos.y);
-        }
-        if (this.selectTile.figure){
+        } 
+        else {
+            if (this.selectTile !== null && this.selectTile.hasFigure()) {
+                this.highlightPossibleTiles(false);
+            }
 
-            this.highlightAllMoves(this.selectTile);
+            this.selectTile = this.getTile(pos.x, pos.y);
+
+            if (this.selectTile.hasFigure()){
+                if (this.selectTile.figure.getHighlightableTiles() === null) {
+                    var tiles = this.getAllPossibleTilesToAct(this.selectTile, tile => tile.isEmpty());
+                    this.selectTile.figure.setHighlitableTiles(tiles);
+                }
+                
+                this.highlightPossibleTiles(true);
+            }
         }
         this.draw();
     }
 
-    highlightAllMoves(tile){
-        //let startPos = tile.position, checkedPos = tile.position;
-        let checkedPos = new Object(tile.position);        
-        
-            //console.log(`startpos ${startPos.x}, ${startPos.y}`);
+    highlightPossibleTiles(b) {
+        var tiles = this.selectTile.figure.getHighlightableTiles();
+
+        if (tiles !== null && tiles.length>0) {
+            tiles.forEach(tile => tile.highlightMove(b));
+        }
+    }
+
+    getAllPossibleTilesToAct(tile, cond){   
         let directions = [[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1],[0,1],[1,1]];
+        var result = [];
         for (let direction of directions){
-            
+            var currentTile = this.getTile(tile.position.x,tile.position.y);
+
             while (true){
-                let nextTile = this.stepIn(this.tiles[checkedPos.x][checkedPos.y], direction)             
-                if (nextTile.isEmpty()){
-                    nextTile.highlightMove();                        
-                    console.log(`highlighted ${checkedPos.x}, ${checkedPos.y}`);
-                } else {
+                currentTile = this.stepIn(currentTile, direction);
+
+                if (currentTile == null || !cond(currentTile)){
                     break;
-                }            
-            checkedPos.x = tile.position.x;
-            //console.log(startPos.x);
-            checkedPos.y = tile.position.y;
-            //console.log(startPos.y);
-            //console.log(`reset to ${checkedPos.x}, ${checkedPos.y}`);
-                
+                }
+
+                result.push(currentTile);                     
             }
         }
-        
+
+        return result;
     } 
 
     stepIn(tile, direction){
         try {
-            return this.tiles[tile.position.x+direction[0]][tile.position.y+direction[1]]
+            return this.getTile(tile.position.x+direction[0], tile.position.y+direction[1])
         } catch (e){
             if (e instanceof TypeError){
                 return
@@ -210,7 +201,10 @@ class GameMap extends Scene{
 
         
     getTile(x, y) {
-        return this.tiles[x][y];
+        if (x>=0 && y>=0 && x<this.size && y<this.size) {
+            return this.tiles[x][y];
+        }
+        return null;
     }
 }
 
@@ -241,10 +235,21 @@ class Tile{
 
     isEmpty(){
         return this.figure == null;
+        // здесь еще будет проверка на огонь
     }
 
-    highlightMove(){
-        this.bodyColour = this.movesColour;
+    hasFigure() {
+        return this.figure !== null;
+    }
+
+    highlightMove(b){
+        if (b) {
+            this._bodyColor = this.bodyColour;
+            this.bodyColour = this.movesColour;
+        }
+        else {
+            this.bodyColour = this._bodyColor;
+        }
     }
 
     takeFigureAway(){
@@ -270,6 +275,8 @@ class Figure {
         this.tile = null;
         this.figureImage = owner.team=='white'?WHITE_FIGURE:BLACK_FIGURE;
         this.initialPosition = initialPosition;
+
+        this.highlightableTiles = null;
     }
     
     draw(canvasData) {
@@ -283,19 +290,28 @@ class Figure {
     getScreenPosition() {
         return this.tile.getScreenPosition();
     }
+
+    setHighlitableTiles(tiles) {
+        this.highlightableTiles = tiles;
+    }
+
+    getHighlightableTiles() {
+        return this.highlightableTiles;
+    }
 }
 
 class Player {
 
-    constructor(name, numOfFigures) {
+    constructor(name, numOfFigures, boardSize) {
         this.name = name;
         this.allFigures = [];
         this.numOfFigures = numOfFigures;
-        var posXarray = shuffle();
-        var posYarray = shuffle(); 
+
+        let xPositions = Array.from(Array(boardSize.width).keys()).sort(() => 0.5 - Math.random()).slice(0, numOfFigures);
+        let yPositions = Array.from(Array(boardSize.height).keys()).sort(() => 0.5 - Math.random()).slice(0, numOfFigures);
 
         for (var i = 0; i<this.numOfFigures; i++){
-            var figure = new Figure(this, {x: posXarray[i], y: posYarray[i]});
+            var figure = new Figure(this, {x: xPositions[i], y: yPositions[i]});
             this.allFigures.push(figure);
         }
     }
