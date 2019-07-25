@@ -118,13 +118,12 @@ class GameMap extends Scene{
         // .bind(this) устанавливает значение this внутри функции и возвращает новую функцию
         this.addEventListener("click", this.click.bind(this));
         this.draw()
-        this.draw()
     }
 
     click(event) {
         var x = event.pageX - canvas.offsetLeft,
             y = event.pageY - canvas.offsetTop;
-        var posX = Math.floor(x/(WIDTH/this.size)), // must be an easier way to do this
+        var posX = Math.floor(x/(WIDTH/this.size)),
             posY = Math.floor(y/(WIDTH/this.size));
         this.changeSelection({x:posX, y:posY});
     }
@@ -165,9 +164,51 @@ class GameMap extends Scene{
         } else {
             this.selectTile = this.getTile(pos.x, pos.y);
         }
+        if (this.selectTile.figure){
+
+            this.highlightAllMoves(this.selectTile);
+        }
         this.draw();
     }
 
+    highlightAllMoves(tile){
+        //let startPos = tile.position, checkedPos = tile.position;
+        let checkedPos = new Object(tile.position);        
+        
+            //console.log(`startpos ${startPos.x}, ${startPos.y}`);
+        let directions = [[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1],[0,1],[1,1]];
+        for (let direction of directions){
+            
+            while (true){
+                let nextTile = this.stepIn(this.tiles[checkedPos.x][checkedPos.y], direction)             
+                if (nextTile.isEmpty()){
+                    nextTile.highlightMove();                        
+                    console.log(`highlighted ${checkedPos.x}, ${checkedPos.y}`);
+                } else {
+                    break;
+                }            
+            checkedPos.x = tile.position.x;
+            //console.log(startPos.x);
+            checkedPos.y = tile.position.y;
+            //console.log(startPos.y);
+            //console.log(`reset to ${checkedPos.x}, ${checkedPos.y}`);
+                
+            }
+        }
+        
+    } 
+
+    stepIn(tile, direction){
+        try {
+            return this.tiles[tile.position.x+direction[0]][tile.position.y+direction[1]]
+        } catch (e){
+            if (e instanceof TypeError){
+                return
+            }
+        } 
+    }
+
+        
     getTile(x, y) {
         return this.tiles[x][y];
     }
@@ -176,7 +217,8 @@ class GameMap extends Scene{
 
 class Tile{
     borderColour = "#101010";
-    selectColor = "#cc0000";
+    selectColour = "#cc0000";
+    movesColour = "#36a738";
 
     constructor(position, bodyColour){
         this.position = position;
@@ -188,7 +230,7 @@ class Tile{
     draw(canvasData, info) {
         var screen = this.getScreenPosition()
 
-        canvasData.ctx.fillStyle = info.selected?this.selectColor:this.bodyColour;
+        canvasData.ctx.fillStyle = info.selected?this.selectColour:this.bodyColour;
         canvasData.ctx.fillRect(screen.x, screen.y, screen.size, screen.size);
 
         canvasData.ctx.fillStyle = this.borderColour;
@@ -199,6 +241,10 @@ class Tile{
 
     isEmpty(){
         return this.figure == null;
+    }
+
+    highlightMove(){
+        this.bodyColour = this.movesColour;
     }
 
     takeFigureAway(){
