@@ -34,8 +34,8 @@ server.get('/main', function getJS(req, res, next){
   })
 })
 
-server.get('/images/whtfig', function getWhiteFigure(req, res, next){
-  fs.readFile(__dirname + '/whtfig.png', function(error, data){
+server.get('/images/:suffix/:name', function getWhiteFigure(req, res, next){
+  fs.readFile(__dirname + '/src/' + req.params.name + '.' + req.params.suffix, function(error, data){
     if (error){
       next(error);
       return;
@@ -47,18 +47,19 @@ server.get('/images/whtfig', function getWhiteFigure(req, res, next){
   })
 })
 
-server.get('/images/blkfig', function getBlackFigure(req, res, next){
-  fs.readFile(__dirname + '/blkfig.png', function(error, data){
+
+server.get('/gameLogic/:name', function (req, res, next) {
+  fs.readFile(__dirname + '/gameLogic/' + req.params.name, function(error, data){
     if (error){
       next(error);
       return;
     }
-    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Type', 'text/javascript');
         res.writeHead(200);
         res.end(data);
         next();
   })
-})
+});
 
 server.listen(8080, function() {
   console.log('%s listening at %s', server.name, server.url);
