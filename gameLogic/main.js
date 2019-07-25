@@ -28,13 +28,23 @@ function start(size, numOfFigures){
                 alert('hello')
             }),
             new MenuOption('Start Game', scene => {
+                var i=0;
+                var allPossibles = Array.from(Array(size*size), function () {return {x: Math.floor(i/size), y: ++i%size}}).sort(x=>0.5-Math.random());
+                console.log(allPossibles);
+
                 scene.changeScene(
                     new GameMap(
                         canvasData, 
                         size,  
                         {
-                            white: new Player("white", numOfFigures, {width:size, height: size}),
-                            black: new Player("black", numOfFigures, {width:size, height: size}) 
+                            white: new Player(
+                                "white", 
+                                allPossibles.slice(0, numOfFigures)
+                            ),
+                            black: new Player(
+                                "black", 
+                                allPossibles.slice(numOfFigures, 2*numOfFigures)
+                            ) 
                         }
                     )
                 )
@@ -301,17 +311,14 @@ class Figure {
 }
 
 class Player {
-
-    constructor(name, numOfFigures, boardSize) {
-        this.name = name;
+    constructor(team, figuresPlaces) {
+        this.team = team;
         this.allFigures = [];
-        this.numOfFigures = numOfFigures;
-
-        let xPositions = Array.from(Array(boardSize.width).keys()).sort(() => 0.5 - Math.random()).slice(0, numOfFigures);
-        let yPositions = Array.from(Array(boardSize.height).keys()).sort(() => 0.5 - Math.random()).slice(0, numOfFigures);
-
-        for (var i = 0; i<this.numOfFigures; i++){
-            var figure = new Figure(this, {x: xPositions[i], y: yPositions[i]});
+        this.numOfFigures = figuresPlaces.length;
+        
+        for (var i = 0; i<figuresPlaces.length; i++){
+            console.log(figuresPlaces[i]+"");
+            var figure = new Figure(this, figuresPlaces[i]);
             this.allFigures.push(figure);
         }
     }
