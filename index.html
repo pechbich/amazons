@@ -20,7 +20,14 @@
                 
             </canvas>
         </div>
-        <script src="/main"></script>
+        <!-- Загружаем зависимости -->
+        <script src="/socket.io/socket.io.js"></script>
+
+        <!-- Загружаем логику -->
+        <script src="/gameLogic/connection.js"></script>
+        <script src="/gameLogic/sceneManager.js"></script>
+        <script src="/gameLogic/mainmenu.js"></script>
+        <script src="/gameLogic/main.js"></script>
         <script>start(8, 2)</script>
     </body>
 </html>
