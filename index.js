@@ -1,5 +1,7 @@
 var restify = require('restify');
 var fs = require('fs');
+var socketio = require('socket.io')
+var tools = require('./gameLogic/tools')
 
 function respond(req, res, next) {
   res.send();
@@ -7,6 +9,13 @@ function respond(req, res, next) {
 }
 
 var server = restify.createServer();
+server.name = "Amazons v0.3";
+
+var io = socketio.listen(server.server); // Ну тут так надо 
+
+/*
+  Настройка http
+*/
 
 server.get('/', function getHTML(req, res, next) {
     fs.readFile(__dirname + '/index.html', function(error, data){
@@ -61,6 +70,59 @@ server.get('/gameLogic/:name', function (req, res, next) {
   })
 });
 
-server.listen(8080, function() {
+/*
+  Настройка socket
+*/
+
+var connectedUsers = new Set();
+
+var games = []; 
+
+io.sockets.on('connection', client => {
+
+  // обработчик когда кто-то начианет искать игру
+  client.on('lookForGame', () => {
+    console.log('looking for a game' + client.name)
+    if (connectedUsers.size==0){
+      connectedUsers.add(client);
+      return;
+    }
+
+    var lastConnectedUser = tools.popRandomFromSet(connectedUsers);
+
+    games.push({
+      white: client,
+      black: lastConnectedUser
+    })
+
+    var playerPositions = tools.getPositions(8, 2); // TODO передавать размер
+
+    client.emit('gameFound', {
+      playerPositions: playerPositions,
+      color: "white"
+    });
+    
+    lastConnectedUser.emit('gameFound', {
+      playerPositions: playerPositions,
+      color: "black"
+    });
+  })
+
+  console.log('hello blyat')
+  client.on('disconnect', () => {
+
+  });
+
+  client.on('selectTile', (data) => {
+    var oppenent = tools.findOppenent(games, client);
+    oppenent.emit('selectTile', data);
+  });
+});
+
+/*
+  Запуск сервера
+*/
+
+server.listen(8080, '127.0.0.1', function() {
   console.log('%s listening at %s', server.name, server.url);
 });

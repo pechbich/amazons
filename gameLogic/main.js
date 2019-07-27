@@ -27,27 +27,20 @@ function start(size, numOfFigures){
             new MenuOption('alert', scene => {
                 alert('hello')
             }),
-            new MenuOption('Start Game', scene => {
-                var i=0;
-                var allPossibles = Array.from(Array(size*size), function () {return {x: Math.floor(i/size), y: ++i%size}}).sort(x=>0.5-Math.random());
-                console.log(allPossibles);
 
-                scene.changeScene(
-                    new GameMap(
-                        canvasData, 
-                        size,  
-                        {
-                            white: new Player(
-                                "white", 
-                                allPossibles.slice(0, numOfFigures)
-                            ),
-                            black: new Player(
-                                "black", 
-                                allPossibles.slice(numOfFigures, 2*numOfFigures)
-                            ) 
-                        }
+            new MenuOption('Start Game', scene => {
+                socket.emit('lookForGame', {});
+                
+                socket.on('gameFound', event => {
+                    scene.changeScene(
+                        new GameMap(
+                            canvasData, 
+                            size,  
+                            event.playerPositions,
+                            event.color
+                        )
                     )
-                )
+                });
             })
         ]);
     menu.show();
@@ -61,15 +54,24 @@ function changePosition(object, newPosX, newPosY){
 
 
 class GameMap extends Scene{
-    constructor(canvasData, size, players) {
+    positionSelected = null;
+    selectTile = null;
+
+    constructor(canvasData, size, positions, color) {
         super(canvasData);
+        this.notifyServer = initSocket(this);
+
         this.canvasData.size.tileSize = 1024/size;  
         this.size = size;
         this.tiles = [];
-        this.positionSelected = null;
-        this.selectTile = null;
+        this.color = color;
 
-        // подготавливаем тайлы
+        this._placeTiles(size)
+
+        this._placePlayers(positions)
+    }
+
+    _placeTiles(size) {
         for (var x=0; x<size; x++) {
             this.tiles.push([]);
             for (var y=0; y<size; y++) {
@@ -91,12 +93,21 @@ class GameMap extends Scene{
                 );
             }
         }
+    }
 
-        // подготавливаем игроков
-        this.players = players;
-        for (var team in players) {
-            let player = players[team];
-            player.setMap(this);
+    _placePlayers(positions) {
+        this.players = {
+            white: new Player(
+                "white", 
+                positions.white
+            ),
+            black: new Player(
+                "black", 
+                positions.black
+            ) 
+        };
+        for (var team in this.players) {
+            this.players[team].setMap(this);
         }
     }
 
@@ -113,6 +124,8 @@ class GameMap extends Scene{
         var posX = Math.floor(x/(WIDTH/this.size)),
             posY = Math.floor(y/(WIDTH/this.size));
         this.changeSelection({x:posX, y:posY});
+
+        this.notifyServer.selectTile({x:posX, y:posY, color: this.color});
     }
 
     update() {
@@ -145,6 +158,8 @@ class GameMap extends Scene{
     }
 
     changeSelection(pos){
+        if (pos.color == this.color) return;
+        
         if (this.selectTile != null && this.selectTile.position.x == pos.x && this.selectTile.position.y == pos.y) {
             
             if (this.selectTile.hasFigure()) {
@@ -317,7 +332,6 @@ class Player {
         this.numOfFigures = figuresPlaces.length;
         
         for (var i = 0; i<figuresPlaces.length; i++){
-            console.log(figuresPlaces[i]+"");
             var figure = new Figure(this, figuresPlaces[i]);
             this.allFigures.push(figure);
         }
