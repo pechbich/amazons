@@ -1,1 +1,2 @@
-const io = require('socket.io-client');
+// eslint-disable-next-line no-unused-vars
+const io = require('socket.io-client')
