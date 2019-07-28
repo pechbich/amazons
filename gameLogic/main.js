@@ -5,14 +5,36 @@
 /* global Scene */
 /* global initSocket */
 
-const WIDTH = 1024
-const HEIGHT = 1024
+const WIDTH = 640
+const HEIGHT = 640
 
 // загружаем ресурсы
 const BLACK_FIGURE = new Image()
 BLACK_FIGURE.src = '/images/png/blkfig'
 const WHITE_FIGURE = new Image()
 WHITE_FIGURE.src = '/images/png/whtfig'
+
+// координаты выделенного тайла с фигурой
+var oldX = null
+var oldY = null
+
+// выбранный тайл для хода 
+var selectedTile = null
+
+// возможные тайлы для хода
+var tilesToMove = []
+
+function drawSquare(canvasData, color, tile) {
+    var screen = tile.getScreenPosition()
+
+    canvasData.ctx.fillStyle = color
+    canvasData.ctx.fillRect(screen.x, screen.y, screen.size, screen.size)
+
+    canvasData.ctx.fillStyle = '#101010'
+    canvasData.ctx.rect(screen.x, screen.y, screen.size, screen.size)
+
+    canvasData.ctx.stroke()
+}
 
 // gotta let user select size and number of figures
 // assuming the game is always for two players
@@ -67,7 +89,7 @@ class GameMap extends Scene {
 
     this.notifyServer = initSocket(this)
 
-    this.canvasData.size.tileSize = 1024 / size
+    this.canvasData.size.tileSize = WIDTH / size
     this.size = size
     this.tiles = []
     this.color = color
@@ -129,9 +151,33 @@ class GameMap extends Scene {
     var y = event.pageY - this.canvasData.canvas.offsetTop
     var posX = Math.floor(x / (WIDTH / this.size))
     var posY = Math.floor(y / (WIDTH / this.size))
-    this.changeSelection({ x: posX, y: posY })
 
-    this.notifyServer.selectTile({ x: posX, y: posY, color: this.color })
+    selectedTile = this.getTile(posX, posY)
+    if (selectedTile.isEmpty()) {
+
+      if (oldX != null && oldY != null) {
+
+        var tile0 = this.getTile(oldX, oldY)
+
+        if (tilesToMove.includes(selectedTile)) {
+          tile0.figure.owner.moveFigure(tile0, selectedTile)
+
+          // send this to server
+          console.log({start: {x: oldX, y: oldY}, end: {x: posX, y: posY}})
+        }
+      }
+      oldY = null
+      oldY = null
+      tilesToMove = []    
+    }
+    else {
+      oldX = posX
+      oldY = posY 
+      tilesToMove = this.getAllPossibleTilesToAct(this.getTile(oldX, oldY), tile => tile.isEmpty())
+    }
+
+    this.draw()
+ 
   }
 
   update () {
@@ -155,6 +201,16 @@ class GameMap extends Scene {
       }
     }
 
+    // возможные ходы
+    for (var t in tilesToMove) {
+      var tt = tilesToMove[t]
+      drawSquare(this.canvasData,'#00cc00', tt)
+    }
+
+    // выделение
+    if (selectedTile != null) drawSquare(this.canvasData,'#cc0000', selectedTile)
+    
+
     // рисуем игроков
     for (var team in this.players) {
       var player = this.players[team]
@@ -163,40 +219,40 @@ class GameMap extends Scene {
     }
   }
 
-  changeSelection (pos) {
-    if (pos.color === this.color) return
+  // changeSelection (pos) {
+  //   if (pos.color === this.color) return
 
-    if (this.selectTile != null && this.selectTile.position.x === pos.x && this.selectTile.position.y === pos.y) {
-      if (this.selectTile.hasFigure()) {
-        this.highlightPossibleTiles(false)
-      }
-      this.selectTile = null
-    } else {
-      if (this.selectTile !== null && this.selectTile.hasFigure()) {
-        this.highlightPossibleTiles(false)
-      }
+  //   if (this.selectTile != null && this.selectTile.position.x === pos.x && this.selectTile.position.y === pos.y) {
+  //     if (this.selectTile.hasFigure()) {
+  //       this.highlightPossibleTiles(false)
+  //     }
+  //     this.selectTile = null
+  //   } else {
+  //     if (this.selectTile !== null && this.selectTile.hasFigure()) {
+  //       this.highlightPossibleTiles(false)
+  //     }
 
-      this.selectTile = this.getTile(pos.x, pos.y)
+  //     this.selectTile = this.getTile(pos.x, pos.y)
 
-      if (this.selectTile.hasFigure()) {
-        if (this.selectTile.figure.getHighlightableTiles() === null) {
-          var tiles = this.getAllPossibleTilesToAct(this.selectTile, tile => tile.isEmpty())
-          this.selectTile.figure.setHighlitableTiles(tiles)
-        }
+  //     if (this.selectTile.hasFigure()) {
+  //       if (this.selectTile.figure.getHighlightableTiles() === null) {
+  //         var tiles = this.getAllPossibleTilesToAct(this.selectTile, tile => tile.isEmpty())
+  //         this.selectTile.figure.setHighlitableTiles(tiles)
+  //       }
 
-        this.highlightPossibleTiles(true)
-      }
-    }
-    this.draw()
-  }
+  //       this.highlightPossibleTiles(true)
+  //     }
+  //   }
+  //   this.draw()
+  // }
 
-  highlightPossibleTiles (b) {
-    var tiles = this.selectTile.figure.getHighlightableTiles()
+  // highlightPossibleTiles (b) {
+  //   var tiles = this.selectTile.figure.getHighlightableTiles()
 
-    if (tiles !== null && tiles.length > 0) {
-      tiles.forEach(tile => tile.highlightMove(b))
-    }
-  }
+  //   if (tiles !== null && tiles.length > 0) {
+  //     tiles.forEach(tile => tile.highlightMove(b))
+  //   }
+  // }
 
   getAllPossibleTilesToAct (tile, cond) {
     const directions = [[1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1]]
