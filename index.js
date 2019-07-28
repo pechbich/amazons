@@ -69,34 +69,56 @@ server.get('/gameLogic/:name', function (req, res, next) {
   Настройка socket
 */
 
-var connectedUsers = new Set()
+class Pool {
+  constructor () {
+    this.pools = {}
+  }
+
+  get (rule) {
+    var subpool = this.pools[rule]
+    if (subpool === null || subpool === undefined) {
+      return null
+    }
+    delete this.pools[rule]
+    return subpool
+  }
+
+  add (rule, client) {
+    this.pools[rule] = client
+  }
+}
+
+var pools = new Pool()
 
 var games = []
 
 io.sockets.on('connection', client => {
   // обработчик когда кто-то начианет искать игру
-  client.on('lookForGame', () => {
-    console.log('looking for a game' + client.name)
-    if (connectedUsers.size === 0) {
-      connectedUsers.add(client)
+  client.on('lookForGame', (data) => {
+    console.log('looking for a game' + data)
+    var oppenent = pools.get(data)
+    if (oppenent === client) {
       return
     }
 
-    var lastConnectedUser = tools.popRandomFromSet(connectedUsers)
+    if (oppenent === null) {
+      pools.add(data, client)
+      return
+    }
 
     games.push({
       white: client,
-      black: lastConnectedUser
+      black: oppenent
     })
 
-    var playerPositions = tools.getPositions(8, 2) // TODO передавать размер
+    var playerPositions = tools.getPositions(data) // TODO передавать размер
 
     client.emit('gameFound', {
       playerPositions: playerPositions,
       color: 'white'
     })
 
-    lastConnectedUser.emit('gameFound', {
+    oppenent.emit('gameFound', {
       playerPositions: playerPositions,
       color: 'black'
     })
@@ -104,12 +126,21 @@ io.sockets.on('connection', client => {
 
   console.log('hello blyat')
   client.on('disconnect', () => {
-
+    var oppenent = tools.findOppenent(games, client)
+    if (oppenent) {
+      oppenent.emit('gameOver', { message: 'You Win' })
+    }
   })
 
   client.on('selectTile', (data) => {
     var oppenent = tools.findOppenent(games, client)
     oppenent.emit('selectTile', data)
+  })
+
+  client.on('moveEvent', data => {
+    var oppenent = tools.findOppenent(games, client)
+    oppenent.emit('moveEvent', data)
+    client.emit('moveEvent', data)
   })
 })
 

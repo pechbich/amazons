@@ -1,10 +1,17 @@
 module.exports = {
-  getPositions: function (size, num) {
+  getPositions: function (rule) {
     var i = 0
-    var allPossibles = Array.from(Array(size * size), function () { return { x: Math.floor(i / size), y: ++i % size } }).sort(x => 0.5 - Math.random())
+    var allPossibles = Array.from(
+      Array(rule.boardSize.width * rule.boardSize.height), // создаем массив
+      function () { // заполняем его
+        return {
+          x: Math.floor(i / rule.boardSize.width),
+          y: ++i % rule.boardSize.width
+        }
+      }).sort(x => 0.5 - Math.random()) // перемешиваем
     return {
-      white: allPossibles.slice(0, num),
-      black: allPossibles.slice(num, num * 2)
+      white: allPossibles.slice(0, rule.numOfFigures),
+      black: allPossibles.slice(rule.numOfFigures, rule.numOfFigures * 2)
     }
   },
 

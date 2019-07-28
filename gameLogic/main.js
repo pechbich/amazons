@@ -36,7 +36,13 @@ function start (size, numOfFigures) {
       }),
 
       new MenuOption('Start Game', scene => {
-        socket.emit('lookForGame', {})
+        socket.emit('lookForGame', {
+          boardSize: {
+            width: size,
+            height: size
+          },
+          numOfFigures: numOfFigures
+        })
 
         socket.on('gameFound', event => {
           scene.changeScene(
@@ -272,14 +278,14 @@ class Tile {
     }
   }
 
-  takeFigureAway () {
+  takeFigure () {
     var takenFigure = this.figure
     this.figure = null
     takenFigure.tile = null
     return takenFigure
   }
 
-  placeFigureHere (figure) {
+  placeFigure (figure) {
     this.figure = figure
     figure.tile = this
   }
@@ -339,14 +345,7 @@ class Player {
     for (var i = 0; i < this.numOfFigures; i++) {
       var figure = this.allFigures[i]
       var tile = map.getTile(figure.initialPosition.x, figure.initialPosition.y)
-      tile.placeFigureHere(figure)
-    }
-  }
-
-  moveFigure (fromTile, toTile) {
-    if (toTile.isEmpty()) {
-      var takenFigure = fromTile.takeFigureAway()
-      toTile.placeFigureHere(takenFigure)
+      tile.placeFigure(figure)
     }
   }
 
