@@ -3,11 +3,6 @@ var fs = require('fs');
 var socketio = require('socket.io')
 var tools = require('./gameLogic/tools')
 
-function respond(req, res, next) {
-  res.send();
-  next();
-}
-
 var server = restify.createServer();
 server.name = "Amazons v0.3";
 
@@ -123,6 +118,6 @@ io.sockets.on('connection', client => {
   Запуск сервера
 */
 
-server.listen(8080, '127.0.0.1', function() {
+server.listen(process.env.PORT || 8080, function() {
   console.log('%s listening at %s', server.name, server.url);
 });

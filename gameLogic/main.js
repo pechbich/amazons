@@ -54,11 +54,11 @@ function changePosition(object, newPosX, newPosY){
 
 
 class GameMap extends Scene{
-    positionSelected = null;
-    selectTile = null;
-
     constructor(canvasData, size, positions, color) {
         super(canvasData);
+        this.positionSelected = null;
+        this.selectTile = null;
+
         this.notifyServer = initSocket(this);
 
         this.canvasData.size.tileSize = 1024/size;  
@@ -235,11 +235,11 @@ class GameMap extends Scene{
 
 
 class Tile{
-    borderColour = "#101010";
-    selectColour = "#cc0000";
-    movesColour = "#36a738";
-
     constructor(position, bodyColour){
+        this.borderColour = "#101010";
+        this.selectColour = "#cc0000";
+        this.movesColour = "#36a738";
+
         this.position = position;
         this.bodyColour = bodyColour;
         this.figure = null;

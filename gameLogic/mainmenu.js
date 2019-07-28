@@ -34,10 +34,10 @@ class MenuOption{
     }
 }
 
-class Menu extends Scene{
-    backgroudColor = '#434343';
+class Menu extends Scene {
     constructor(canvasData, options) {
         super(canvasData);
+        this.backgroudColor = '#434343';
         this.options = options
         this.positions = {}
 
