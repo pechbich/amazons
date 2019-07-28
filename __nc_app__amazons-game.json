@@ -1,0 +1,80 @@
+{
+  ".gitignore": {
+    "mt": "Sat Jul 27 2019 11:27:04 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\.gitignore"
+  },
+  "gameLogic/connection.js": {
+    "mt": "Sun Jul 28 2019 11:28:25 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\gameLogic\\connection.js"
+  },
+  "gameLogic/main.js": {
+    "mt": "Sun Jul 28 2019 11:27:53 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\gameLogic\\main.js"
+  },
+  "gameLogic/mainmenu.js": {
+    "mt": "Sun Jul 28 2019 11:26:47 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\gameLogic\\mainmenu.js"
+  },
+  "gameLogic/sceneManager.js": {
+    "mt": "Sat Jul 20 2019 13:09:54 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\gameLogic\\sceneManager.js"
+  },
+  "gameLogic/tools.js": {
+    "mt": "Sat Jul 27 2019 11:11:22 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\gameLogic\\tools.js"
+  },
+  "index.html": {
+    "mt": "Sat Jul 27 2019 09:50:00 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\index.html"
+  },
+  "index.js": {
+    "mt": "Sun Jul 28 2019 11:16:30 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\index.js"
+  },
+  "package-lock.json": {
+    "mt": "Sat Jul 27 2019 09:20:01 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\package-lock.json"
+  },
+  "package.json": {
+    "mt": "Sat Jul 27 2019 13:29:18 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\package.json"
+  },
+  "socket.io/socket.io.js": {
+    "mt": "Sat Jul 27 2019 09:50:52 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\socket.io\\socket.io.js"
+  },
+  "src/blkfig.png": {
+    "mt": "Sat Jul 20 2019 11:23:21 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\src\\blkfig.png"
+  },
+  "src/whtfig.png": {
+    "mt": "Sat Jul 20 2019 11:23:18 GMT+0300 (GMT+03:00)",
+    "exists": true,
+    "state": 1,
+    "path": "C:\\Users\\MERDovashkinar\\project\\amazons\\src\\whtfig.png"
+  }
+}
