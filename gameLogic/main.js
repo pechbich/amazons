@@ -36,7 +36,13 @@ function start (size, numOfFigures) {
       }),
 
       new MenuOption('Start Game', scene => {
-        socket.emit('lookForGame', {})
+        socket.emit('lookForGame', {
+          boardSize: {
+            width: size,
+            height: size
+          },
+          numOfFigures: numOfFigures
+        })
 
         socket.on('gameFound', event => {
           scene.changeScene(
