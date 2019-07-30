@@ -32,7 +32,7 @@ function drawSquare(canvasData, color, tile) {
 
     canvasData.ctx.fillStyle = '#101010'
     canvasData.ctx.rect(screen.x, screen.y, screen.size, screen.size)
-
+     
     canvasData.ctx.stroke()
 }
 
@@ -185,9 +185,12 @@ class GameMap extends Scene {
   }
 
   draw () {
+
     // подготовка
     var ctx = this.canvasData.ctx
+    ctx.beginPath()
     ctx.clearRect(0, 0, this.canvasData.size.width, this.canvasData.size.height)
+    
 
     // рисуем карту
     for (var i = 0; i < this.size; i++) {
@@ -204,11 +207,11 @@ class GameMap extends Scene {
     // возможные ходы
     for (var t in tilesToMove) {
       var tt = tilesToMove[t]
-      drawSquare(this.canvasData,'#00cc00', tt)
+      drawSquare(this.canvasData, 'rgba(0, 200, 0, 0.5)', tt)
     }
 
     // выделение
-    if (selectedTile != null) drawSquare(this.canvasData,'#cc0000', selectedTile)
+    if (selectedTile != null) drawSquare(this.canvasData,'rgba(200, 0, 0, 0.5)', selectedTile)
     
 
     // рисуем игроков
